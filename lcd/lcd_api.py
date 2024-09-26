@@ -132,10 +132,89 @@ class LcdApi:
             addr += self.num_columns
         self.hal_write_command(self.LCD_DDRAM | addr)
 
+    def get_ua_char(self, char):
+        """Ukrainian alphabet:
+        АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩьЮЯ
+        абвгґдеєжзиіїйклмнопрстуфхцчшщьюя
+        """
+        charmap = {
+            0x410: 0x41,  # А
+            0x411: 0xA0,  # Б
+            0x412: 0x42,  # В
+            0x413: 0xA1,  # Г
+            0x490: 0xA1,  # Ґ
+            0x414: 0xE0,  # Д
+            0x415: 0x45,  # Е
+            0x404: 0x45,  # Є
+            0x416: 0xA3,  # Ж
+            0x417: 0xA4,  # З
+            0x418: 0xA5,  # И
+            0x406: 0x49,  # І
+            0x407: 0x49,  # Ї
+            0x419: 0xA6,  # Й
+            0x41A: 0x4B,  # К
+            0x41B: 0xA7,  # Л
+            0x41C: 0x4D,  # М
+            0x41D: 0x48,  # Н
+            0x41E: 0x4F,  # О
+            0x41F: 0xA8,  # П
+            0x420: 0x50,  # Р
+            0x421: 0x43,  # С
+            0x422: 0x54,  # Т
+            0x423: 0xA9,  # У
+            0x424: 0xAA,  # Ф
+            0x425: 0x58,  # Х
+            0x426: 0xE1,  # Ц
+            0x427: 0xAB,  # Ч
+            0x428: 0xAC,  # Ш
+            0x429: 0xE2,  # Щ
+            0x44C: 0xC4,  # ь
+            0x42E: 0xB0,  # Ю
+            0x42F: 0xB1,  # Я
+            0x430: 0x61,  # а
+            0x431: 0xB2,  # б
+            0x432: 0xB3,  # в
+            0x433: 0xB4,  # г
+            0x491: 0xB4,  # ґ
+            0x434: 0xE3,  # д
+            0x435: 0x65,  # е
+            0x454: 0x65,  # є
+            0x436: 0xB6,  # ж
+            0x437: 0xB7,  # з
+            0x438: 0xB8,  # и
+            0x456: 0x69,  # і
+            0x457: 0x69,  # ї
+            0x439: 0xB9,  # й
+            0x43A: 0xBA,  # к
+            0x43B: 0xBB,  # л
+            0x43C: 0xBC,  # м
+            0x43D: 0xBD,  # н
+            0x43E: 0x6F,  # о
+            0x43F: 0xBE,  # п
+            0x440: 0x70,  # р
+            0x441: 0x63,  # с
+            0x442: 0xBF,  # т
+            0x443: 0x79,  # у
+            0x444: 0xE4,  # ф
+            0x445: 0x78,  # х
+            0x446: 0xE5,  # ц
+            0x447: 0xC0,  # ч
+            0x448: 0xC1,  # ш
+            0x449: 0xE6,  # щ
+            0x44E: 0xC6,  # ю
+            0x44F: 0xC7,  # я
+        }
+        if ord(char) in charmap:
+            return chr(charmap[ord(char)])
+        else:
+            return char
+
     def putchar(self, char):
         """Writes the indicated character to the LCD at the current cursor
         position, and advances the cursor by one position.
         """
+        if ord(char) >= 0x404:
+             char = self.get_ua_char(char)
         if char == '\n':
             if self.implied_newline:
                 # self.implied_newline means we advanced due to a wraparound,
